@@ -1,57 +1,59 @@
 version: '3.8'
 services:
-  api:
-    build: ./app/
-    container_name: api
-    restart: always
-    networks:
-      - pg-network
-    depends_on:
-      - postgres
-      - redis
+  # api:
+  #   build: ./app/
+  #   container_name: api
+  #   restart: always
+  #   networks:
+  #     - pg-network
+  #   depends_on:
+  #     - postgres
+  #     - redis
 
 
-  redis:
-    image: redis:latest
-    container_name: ${REDIS_HOSTS}
-    command: redis-server
-    restart: always
-    # env_file:
-    #   - ./.env
-    expose:
-      - ${REDIS_PORT}
-    volumes:
-      - redis-data:/var/lib/redis
-      - redis-config:/usr/local/etc/redis/redis.conf
-    ports:
-      - ${REDIS_PORT}:6379
-    networks:
-      - redis-network
+  # redis:
+  #   image: redis:latest
+  #   container_name: ${REDIS_HOSTS}
+  #   command: redis-server
+  #   restart: always
+  #   # env_file:
+  #   #   - ./.env
+  #   expose:
+  #     - ${REDIS_PORT}
+  #   volumes:
+  #     - redis-data:/var/lib/redis
+  #     - redis-config:/usr/local/etc/redis/redis.conf
+  #   ports:
+  #     - ${REDIS_PORT}:6379
+  #   networks:
+  #     - redis-network
 
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: 'redis-commander'
-    # env_file:
-    #   - ./.env
-    environment:
-      - REDIS_HOSTS=${REDIS_HOSTS}
-    ports:
-      - ${REDIS_COMMANDER_PORT}:8081
-    networks:
-      - redis-network
-    depends_on:
-      - redis
+  # redis-commander:
+  #   image: rediscommander/redis-commander:latest
+  #   container_name: 'redis-commander'
+  #   # env_file:
+  #   #   - ./.env
+  #   environment:
+  #     - REDIS_HOSTS=${REDIS_HOSTS}
+  #   ports:
+  #     - ${REDIS_COMMANDER_PORT}:8081
+  #   networks:
+  #     - redis-network
+  #   depends_on:
+      # - redis
 
   postgres:
     image: postgres:alpine
-    container_name: ${PG_HOST}
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    env_file:
+      - ./config/debug.env
     environment:
-      POSTGRES_DB: ${PG_DATABASE_NAME}
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
-      POSTGRES_USER: ${PG_USER}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
     ports:
-      - ${PG_PORT}:5432
+      - ${POSTGRES_PORT}:5432
     restart: on-failure:3
     networks:
       - pg-network
@@ -59,9 +61,11 @@ services:
 
   pgweb_adminer:
     image: adminer
-    container_name: ${ADMINER_HOST}
+    container_name: 'adminer'
+    env_file:
+      - config/debug.env
     environment:
-      DATABASE_URL: postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE_NAME}?sslmode=disable
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONTAINER_NAME}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=disable
     ports:
       - ${ADMINER_PORT}:8080
     restart: on-failure:3
@@ -77,7 +81,7 @@ volumes:
 
 networks:
   pg-network:
-    driver: bridgea
+    driver: bridge
   redis-network:
     driver: bridge
 
