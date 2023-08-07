@@ -33,6 +33,6 @@ class TimeStampModel(SQLModel):
 
 
 class EstimationModel(SQLModel):
-    likes: int = Field(nullable=False)
-    dislikes: int = Field(nullable=False)
-    views: int = Field(nullable=False)
+    likes: int = Field(default=0, nullable=False)
+    dislikes: int = Field(default=0, nullable=False)
+    views: int = Field(default=1, nullable=False)

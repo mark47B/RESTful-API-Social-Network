@@ -29,6 +29,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 
+from app.service.store.sql.post import Table
 from app.service.store.sql.user import Table
 
 # target_metadata = mymodel.Base.metadata
