@@ -5,7 +5,7 @@ from sqlmodel import Field, delete, select
 
 from app.core import user as userCore
 from app.core.schemas import StatusMessage
-from app.core.user.schema import UserPatch, UserRead
+from app.core.user.schemas import UserPatch, UserRead
 from app.service.store.models import TimeStampModel, UUIDModel
 
 from .db import async_session_maker
@@ -56,7 +56,6 @@ def to_identity(row: Table) -> userCore.Identity:
     return userCore.Identity(**row.dict(include={"password", "email"}))
 
 
-@dataclass
 class UserCRUD(userCore.Store):
     async def create(self, data: userCore.UserCreate) -> UUID:
         async with async_session_maker() as session:
@@ -103,12 +102,14 @@ class UserCRUD(userCore.Store):
                 return None
             return to_user(row=row).baseInfo
 
-    async def delete_user_uuid(self, uuid: UUID) -> None:
+    async def delete_user_uuid(self, uuid: UUID) -> bool | None:
         async with async_session_maker() as session:
+            if await session.get(Table, uuid) is None:
+                return None
             stmt = delete(Table).where(Table.uuid == uuid)
             await session.execute(stmt)
             await session.commit()
-            return None
+            return True
 
     async def delete_user_email(self, email: str) -> StatusMessage:
         async with async_session_maker() as session:

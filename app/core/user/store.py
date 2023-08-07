@@ -1,7 +1,7 @@
 from typing import Any, Protocol
 from uuid import UUID
 
-from app.core.user.schema import Identity, User, UserBase, UserCreate, UserPatch
+from app.core.user.schemas import Identity, User, UserBase, UserCreate, UserPatch
 
 
 class Store(Protocol):
